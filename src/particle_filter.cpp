@@ -29,7 +29,8 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
 	double std_x = std[0];
 	double std_y = std[1];
 	double std_theta = std[2];
-	default_random_engine gen;
+	random_device rd;
+	default_random_engine gen(rd());
 
 	normal_distribution<double> dist_x(x, std_x);
 	normal_distribution<double> dist_y(y, std_y);
@@ -126,6 +127,9 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 		if (predicted.size() == 0) {
 			// Cannot find any landmark within sensor range
 			cout << "predicted size=0\n";
+
+			p.weight = 0;
+
 			continue;
 		}
 
@@ -171,7 +175,7 @@ void ParticleFilter::resample() {
 	vector<Particle> picked_particles;
 	for (int i = 0; i < particles.size(); i++)
 		picked_particles.push_back(particles[d(gen)]);
-	particles = picked_particles;
+	particles = std::move(picked_particles);
 }
 
 Particle ParticleFilter::SetAssociations(Particle particle, std::vector<int> associations, std::vector<double> sense_x, std::vector<double> sense_y)
